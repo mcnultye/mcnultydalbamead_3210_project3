@@ -9,12 +9,13 @@
 
     <script type="module">
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 var scene = new THREE.Scene();
 
 var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
-camera.position.z = 100;  
-camera.lookAt( new THREE.Vector3(0.0,0.0,0.0));
+camera.position.set(0, 3, 10);
+camera.lookAt( new THREE.Vector3(0.0,1.0,0.0));
 scene.add( camera );
 
 var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
@@ -22,9 +23,42 @@ renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-/* CREATE/DRAW STUFF HERE */
+ // Light Setup
+ const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+ scene.add(ambientLight);
+ 
+ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+ directionalLight.position.set(5, 10, 7.5);
+ scene.add(directionalLight);
 
-renderer.render( scene, camera );
-    </script>
+const tableGroup = new THREE.Group();
+
+// Tabletop
+const tabletop = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 0.1, 1),
+    new THREE.MeshStandardMaterial({ color: 0x8B4513 }) // Example wood color
+);
+tabletop.position.y = 1;
+tableGroup.add(tabletop);
+
+// Legs
+for (let i = 0; i < 4; i++) {
+    const leg = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 1, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+    );
+    leg.position.set(i < 2 ? 0.9 : -0.9, 0.5, i % 2 === 0 ? 0.45 : -0.45);
+    tableGroup.add(leg);
+}
+
+scene.add(tableGroup);
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+    }
+    animate();    
+</script>
 </body>
 </html>
