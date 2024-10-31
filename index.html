@@ -9,12 +9,13 @@
 
     <script type="module">
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 var scene = new THREE.Scene();
 
-var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
-camera.position.z = 100;  
-camera.lookAt( new THREE.Vector3(0.0,0.0,0.0));
+var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 3000 );
+camera.position.set(0, 9, 6);
+camera.lookAt( new THREE.Vector3(0.0,6.0,2.0));
 scene.add( camera );
 
 var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
@@ -22,9 +23,40 @@ renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-/* CREATE/DRAW STUFF HERE */
+ // Light Setup
+ const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+ scene.add(ambientLight);
+ 
+ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+ directionalLight.position.y = 10;
+ directionalLight.castShadow = true;
+ directionalLight.shadow.mapSize.width = 1024;
+ directionalLight.shadow.mapSize.length = 1024;
 
-renderer.render( scene, camera );
-    </script>
+
+ scene.add(directionalLight);
+
+ const gltfLoader = new GLTFLoader();
+ gltfLoader.load('./components/kitchen_table.glb', function(glb) {
+    const model = glb.scene;
+    scene.add(model);
+    model.rotateY(Math.PI / 2);
+    model.scale.set(0.4, 0.4, 0.4);
+    model.position.set(0.25, 0.15, 0);
+
+    model.traverse(function(node) {
+        if(node.isMesh)
+            node.receiveShadow = true;
+    })
+
+ });
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+    }
+    animate();    
+</script>
 </body>
 </html>
