@@ -10,6 +10,7 @@
     <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import Deck from './components/deck.js';
 
 var scene = new THREE.Scene();
 
@@ -36,6 +37,19 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
  scene.add(directionalLight);
 
+ // Create a new deck and deal cards
+const deck = new Deck();
+deck.shuffle(); // Shuffle the deck
+const playersCount = 3; // Number of players
+const piles = deck.deal(playersCount); // Create piles for each player
+
+const testGeometry = new THREE.BoxGeometry(0.2, 0.3, 0.01);
+const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
+const testCube = new THREE.Mesh(testGeometry, testMaterial);
+testCube.position.set(0, 0.7, 0); // Position it above the table
+scene.add(testCube);
+
+
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
     const model = glb.scene;
@@ -45,71 +59,55 @@ renderer.setSize(window.innerWidth, window.innerHeight);
     model.position.set(0.25, 0.15, 0);
 
     model.traverse(function(node) {
-        if(node.isMesh)
+        if(node.isMesh) {
             node.receiveShadow = true;
+        }
     })
-
+    positionCards();
  });
 
-//Creating the deck
-var deck = [];
- const cardData = {
-    suit: ['spades','hearts', 'clubs', 'diamonds'], 
-    value: [2,3,4,5,6,7,8,9,10,11,12,13,14]}
-
-//creating each individual card
-function createDeck(){
-   cardData.suit.forEach((s) => {
-        cardData.value.forEach((val) => {
-            var card = {
-                suit: s,
-                value: val,
-                obj: createCardObject(createTextures(s,val))
-            }
-            deck.push(card);
-        })
-   })
-}
-
-//creating the textures
-function createTextures(suit,val){
-    var loader = new THREE.TextureLoader();
-    if(val <= 10){
-        return loader.load('cardT/' + val + suit + '.png');
-    } else if (val == 11){
-        return loader.load('cardT/jack' + suit + '.png');
-    } else if (val == 12){
-        return loader.load('cardT/queen' + suit + '.png');
-    } else if (val == 13){
-        return loader.load('cardT/king' + suit + '.png');
-    } else if (val == 14){
-        return loader.load('cardT/ace' + suit + '.png');
+ function positionCards() {
+    // Check if piles are created
+    if (piles.length === 0) {
+        console.log("No piles available.");
+        return;
     }
+
+      // Create positions for the cards
+      const pilePositions = [
+      new THREE.Vector3(-1.5, 4, -2.5), // Adjusted Y for height above table
+      new THREE.Vector3(1.5, 4, -2.5),
+      new THREE.Vector3(0, 4, 2.5)
+  ];
+
+     // Position the cards for each player
+     piles.forEach((pile, index) => {
+        pile.forEach((card, cardIndex) => {
+            const position = pilePositions[index];
+            const offset = cardIndex * 0.1; // Stacking cards vertically
+
+            // Position the card
+            card.obj.position.set(position.x, position.y + offset, position.z);
+            card.obj.scale.set(1, 1, 1); // Ensure cards are not scaled down
+            scene.add(card.obj);
+
+            // Debugging: Log card information
+            console.log(`Positioned card ${cardIndex} for player ${index}:`, {
+                position: card.obj.position,
+                scale: card.obj.scale,
+                visible: card.obj.visible,
+            });
+        });
+    });
 }
 
-//creating the card object
-function createCardObject(texture){
-    var geometry = new THREE.BoxGeometry(.4,.6,.001);
-    var materials = [
-        new THREE.MeshBasicMaterial(),
-        new THREE.MeshBasicMaterial(),
-        new THREE.MeshBasicMaterial(),
-        new THREE.MeshBasicMaterial(),
-        new THREE.MeshBasicMaterial({map: 'cardT/'+texture}),
-        new THREE.MeshBasicMaterial({map: 'cardT/back.png'})
-    ];
-    var mesh = new THREE.Mesh(geometry, materials);
-    return mesh;
-}
-
-createDeck();
-
-  // Render loop
-  function animate() {
+// Render loop
+function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
-    }
-    animate();    
+
+}
+animate();    
 </script>
 </body>
 </html>
