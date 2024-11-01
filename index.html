@@ -37,6 +37,19 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
  scene.add(directionalLight);
 
+ // Create a new deck and deal cards
+const deck = new Deck();
+deck.shuffle(); // Shuffle the deck
+const playersCount = 3; // Number of players
+const piles = deck.deal(playersCount); // Create piles for each player
+
+const testGeometry = new THREE.BoxGeometry(0.2, 0.3, 0.01);
+const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
+const testCube = new THREE.Mesh(testGeometry, testMaterial);
+testCube.position.set(0, 0.7, 0); // Position it above the table
+scene.add(testCube);
+
+
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
     const model = glb.scene;
@@ -46,38 +59,47 @@ renderer.setSize(window.innerWidth, window.innerHeight);
     model.position.set(0.25, 0.15, 0);
 
     model.traverse(function(node) {
-        if(node.isMesh)
+        if(node.isMesh) {
             node.receiveShadow = true;
+        }
     })
-
+    positionCards();
  });
 
- // Initialize Deck
-const deck = new Deck();
-deck.shuffle();
-const piles = deck.deal(3); // Assuming 3 players
-console.log("Piles after dealing:", piles);
+ function positionCards() {
+    // Check if piles are created
+    if (piles.length === 0) {
+        console.log("No piles available.");
+        return;
+    }
 
-// Create positions for the cards
-const pilePositions = [
-    new THREE.Vector3(-1.5, 0.25, -2.5), // Adjust Y to sit on the table
-    new THREE.Vector3(1.5, 0.25, -2.5),
-    new THREE.Vector3(0, 0.25, 2.5)
-];
+      // Create positions for the cards
+      const pilePositions = [
+      new THREE.Vector3(-1.5, 4, -2.5), // Adjusted Y for height above table
+      new THREE.Vector3(1.5, 4, -2.5),
+      new THREE.Vector3(0, 4, 2.5)
+  ];
 
-// Position the cards for each player
-piles.forEach((pile, index) => {
-    pile.forEach((card, cardIndex) => {
-        const position = pilePositions[index];
-        const offset = cardIndex * 0.1; // Stacking cards vertically
+     // Position the cards for each player
+     piles.forEach((pile, index) => {
+        pile.forEach((card, cardIndex) => {
+            const position = pilePositions[index];
+            const offset = cardIndex * 0.1; // Stacking cards vertically
 
-        // Position the card
-        card.obj.position.set(position.x, position.y + offset, position.z);
-        scene.add(card.obj);
+            // Position the card
+            card.obj.position.set(position.x, position.y + offset, position.z);
+            card.obj.scale.set(1, 1, 1); // Ensure cards are not scaled down
+            scene.add(card.obj);
 
-        console.log(`Positioned card ${cardIndex} for player ${index}:`, card.obj.position);
+            // Debugging: Log card information
+            console.log(`Positioned card ${cardIndex} for player ${index}:`, {
+                position: card.obj.position,
+                scale: card.obj.scale,
+                visible: card.obj.visible,
+            });
+        });
     });
-});
+}
 
 // Render loop
 function animate() {
