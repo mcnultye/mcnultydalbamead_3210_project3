@@ -23,10 +23,13 @@ class Deck{
                 obj: this.createCardObject(this.createTextures(suit,val))
             }
             this.deck.push(card);
+            console.log(`Created card: ${val} of ${suit}`); // Log created card
+
         });
    });
 }
 
+/*
 //creating the textures
  createTextures(suit,val){
     const loader = new THREE.TextureLoader();
@@ -41,6 +44,22 @@ class Deck{
     } else if (val == 14){
         return loader.load('components/cardT/ace' + suit + '.png');
     }
+}
+*/
+
+createTextures(suit, val) {
+    const loader = new THREE.TextureLoader();
+    const texturePath = val <= 10 
+        ? `components/cardT/${val}${suit}.png` 
+        : `components/cardT/${val === 11 ? 'jack' : val === 12 ? 'queen' : val === 13 ? 'king' : 'ace'}${suit}.png`;
+
+    const texture = loader.load(texturePath, (texture) => {
+        console.log(`Loaded texture for ${val} of ${suit}`);
+    }, undefined, (error) => {
+        console.error(`Error loading texture: ${texturePath}`, error);
+    });
+
+    return texture;
 }
 
 //creating the card object
@@ -64,6 +83,10 @@ createCardObject(texture) {
     var mesh = new THREE.Mesh(geometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+
+    console.log(`Created card with material:`, materials); // Debugging output
+    mesh.scale.set(1, 1, 1); // Adjust these values to your liking
+
     return mesh;
 }
 

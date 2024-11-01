@@ -52,70 +52,37 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
  });
 
- // Create and shuffle deck
+ // Initialize Deck
 const deck = new Deck();
 deck.shuffle();
-const piles = deck.deal(3);
+const piles = deck.deal(3); // Assuming 3 players
+console.log("Piles after dealing:", piles);
 
-const tableSurfaceHeight = 3.6311214951294932;
-const cardOffsetAboveTable = 1; // Small offset above the table surface
-
-// Position each player's pile slightly above the table surface
+// Create positions for the cards
 const pilePositions = [
-    new THREE.Vector3(-1.5, tableSurfaceHeight + cardOffsetAboveTable, -2.5), // Player 1
-    new THREE.Vector3(1.5, tableSurfaceHeight + cardOffsetAboveTable, -2.5),  // Player 2
-    new THREE.Vector3(0, tableSurfaceHeight + cardOffsetAboveTable, 2.5)      // Player 3
+    new THREE.Vector3(-1.5, 0.25, -2.5), // Adjust Y to sit on the table
+    new THREE.Vector3(1.5, 0.25, -2.5),
+    new THREE.Vector3(0, 0.25, 2.5)
 ];
 
-// Game state
-let currentCards = [];
-let activePlayers = piles.map((_, i) => i);
+// Position the cards for each player
+piles.forEach((pile, index) => {
+    pile.forEach((card, cardIndex) => {
+        const position = pilePositions[index];
+        const offset = cardIndex * 0.1; // Stacking cards vertically
 
-// Flip cards and determine winner
-function playRound() {
-    currentCards = activePlayers.map(i => piles[i].pop());
-    currentCards.forEach((card, index) => card.obj.position.set(pilePositions[index].x, pilePositions[index].y + 1, pilePositions[index].z));
+        // Position the card
+        card.obj.position.set(position.x, position.y + offset, position.z);
+        scene.add(card.obj);
 
-    // Determine highest card
-    let maxVal = Math.max(...currentCards.map(card => card.value));
-    let winners = currentCards.filter(card => card.value === maxVal);
-    if (winners.length > 1) {
-        // War logic for ties
-        console.log('War!');
-    } else {
-        // Award cards to winner
-        console.log('Player ' + activePlayers[currentCards.findIndex(card => card.value === maxVal)] + ' wins the round');
-    }
-
-    // Check for game end
-    if (piles.some(pile => pile.length === 51)) {
-        console.log('Game over!');
-    }
-}
-
-window.addEventListener('keydown', event => {
-    if (event.key === 'n') playRound();
-    flipTopCards();
+        console.log(`Positioned card ${cardIndex} for player ${index}:`, card.obj.position);
+    });
 });
 
-function flipTopCards() {
-    playerPositions.forEach((position, index) => {
-        const topCard = deck[index * Math.floor(deck.length / playerPositions.length)];
-
-        // Rotate top card to face up
-        if (topCard) {
-            topCard.obj.rotation.y = Math.PI; // Rotate 180 degrees to show front texture
-            topCard.obj.position.y += 0.1;    
-        }
-    });
-
-    // Logic for determining the winner of the round can be added here
-}
 // Render loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
-    console.log("Rendering..."); // Add this line to confirm the loop is running
 
 }
 animate();    
