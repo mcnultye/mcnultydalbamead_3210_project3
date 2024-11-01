@@ -52,20 +52,19 @@ renderer.setSize(window.innerWidth, window.innerHeight);
  });
 
 //Creating the deck
- var deck = [];
+var deck = [];
  const cardData = {
     suit: ['spades','hearts', 'clubs', 'diamonds'], 
     value: [2,3,4,5,6,7,8,9,10,11,12,13,14]}
 
 //creating each individual card
 function createDeck(){
-   cardData.suit.forEach((suit) => {
+   cardData.suit.forEach((s) => {
         cardData.value.forEach((val) => {
             var card = {
-                suit: suit,
+                suit: s,
                 value: val,
-                texture: createTextures(suit,value),
-                obj: createCardObject(texture)
+                obj: createCardObject(createTextures(s,val))
             }
             deck.push(card);
         })
@@ -92,16 +91,18 @@ function createTextures(suit,val){
 function createCardObject(texture){
     var geometry = new THREE.BoxGeometry(.4,.6,.001);
     var materials = [
-        new THREE.BasicMeshMaterial(),
-        new THREE.BasicMeshMaterial(),
-        new THREE.BasicMeshMaterial(),
-        new THREE.BasicMeshMaterial(),
-        new THREE.BasicMeshMaterial({map: 'cardT/'+texture}),
-        new THREE.BasicMeshMaterial({map: 'cardT/back.png'})
+        new THREE.MeshBasicMaterial(),
+        new THREE.MeshBasicMaterial(),
+        new THREE.MeshBasicMaterial(),
+        new THREE.MeshBasicMaterial(),
+        new THREE.MeshBasicMaterial({map: 'cardT/'+texture}),
+        new THREE.MeshBasicMaterial({map: 'cardT/back.png'})
     ];
     var mesh = new THREE.Mesh(geometry, materials);
     return mesh;
 }
+
+createDeck();
 
   // Render loop
   function animate() {
