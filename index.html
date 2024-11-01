@@ -10,7 +10,7 @@
     <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import Deck from './deck.js';
+import Deck from './components/deck.js';
 
 var scene = new THREE.Scene();
 
@@ -52,17 +52,71 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
  });
 
- // Create and add the deck of cards to the scene
+ // Create and shuffle deck
 const deck = new Deck();
-deck.getDeck().forEach(card => {
-    scene.add(card.obj);
+deck.shuffle();
+const piles = deck.deal(3);
+
+const tableSurfaceHeight = 3.6311214951294932;
+const cardOffsetAboveTable = 1; // Small offset above the table surface
+
+// Position each player's pile slightly above the table surface
+const pilePositions = [
+    new THREE.Vector3(-1.5, tableSurfaceHeight + cardOffsetAboveTable, -2.5), // Player 1
+    new THREE.Vector3(1.5, tableSurfaceHeight + cardOffsetAboveTable, -2.5),  // Player 2
+    new THREE.Vector3(0, tableSurfaceHeight + cardOffsetAboveTable, 2.5)      // Player 3
+];
+
+// Game state
+let currentCards = [];
+let activePlayers = piles.map((_, i) => i);
+
+// Flip cards and determine winner
+function playRound() {
+    currentCards = activePlayers.map(i => piles[i].pop());
+    currentCards.forEach((card, index) => card.obj.position.set(pilePositions[index].x, pilePositions[index].y + 1, pilePositions[index].z));
+
+    // Determine highest card
+    let maxVal = Math.max(...currentCards.map(card => card.value));
+    let winners = currentCards.filter(card => card.value === maxVal);
+    if (winners.length > 1) {
+        // War logic for ties
+        console.log('War!');
+    } else {
+        // Award cards to winner
+        console.log('Player ' + activePlayers[currentCards.findIndex(card => card.value === maxVal)] + ' wins the round');
+    }
+
+    // Check for game end
+    if (piles.some(pile => pile.length === 51)) {
+        console.log('Game over!');
+    }
+}
+
+window.addEventListener('keydown', event => {
+    if (event.key === 'n') playRound();
+    flipTopCards();
 });
 
+function flipTopCards() {
+    playerPositions.forEach((position, index) => {
+        const topCard = deck[index * Math.floor(deck.length / playerPositions.length)];
 
+        // Rotate top card to face up
+        if (topCard) {
+            topCard.obj.rotation.y = Math.PI; // Rotate 180 degrees to show front texture
+            topCard.obj.position.y += 0.1;    
+        }
+    });
+
+    // Logic for determining the winner of the round can be added here
+}
 // Render loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
+    console.log("Rendering..."); // Add this line to confirm the loop is running
+
 }
 animate();    
 </script>
