@@ -51,6 +51,58 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
  });
 
+//Creating the deck
+ var deck = [];
+ const cardData = {
+    suit: ['spades','hearts', 'clubs', 'diamonds'], 
+    value: [2,3,4,5,6,7,8,9,10,11,12,13,14]}
+
+//creating each individual card
+function createDeck(){
+   cardData.suit.forEach((suit) => {
+        cardData.value.forEach((val) => {
+            var card = {
+                suit: suit,
+                value: val,
+                texture: createTextures(suit,value),
+                obj: createCardObject(texture)
+            }
+            deck.push(card);
+        })
+   })
+}
+
+//creating the textures
+function createTextures(suit,val){
+    var loader = new THREE.TextureLoader();
+    if(val <= 10){
+        return loader.load('cardT/' + val + suit + '.png');
+    } else if (val == 11){
+        return loader.load('cardT/jack' + suit + '.png');
+    } else if (val == 12){
+        return loader.load('cardT/queen' + suit + '.png');
+    } else if (val == 13){
+        return loader.load('cardT/king' + suit + '.png');
+    } else if (val == 14){
+        return loader.load('cardT/ace' + suit + '.png');
+    }
+}
+
+//creating the card object
+function createCardObject(texture){
+    var geometry = new THREE.BoxGeometry(.4,.6,.001);
+    var materials = [
+        new THREE.BasicMeshMaterial(),
+        new THREE.BasicMeshMaterial(),
+        new THREE.BasicMeshMaterial(),
+        new THREE.BasicMeshMaterial(),
+        new THREE.BasicMeshMaterial({map: 'cardT/'+texture}),
+        new THREE.BasicMeshMaterial({map: 'cardT/back.png'})
+    ];
+    var mesh = new THREE.Mesh(geometry, materials);
+    return mesh;
+}
+
   // Render loop
   function animate() {
     requestAnimationFrame(animate);
