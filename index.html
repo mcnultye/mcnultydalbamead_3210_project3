@@ -23,6 +23,7 @@ var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
 renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 
  // Light Setup
  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -101,6 +102,43 @@ scene.add(testCube);
         });
     });
 }
+
+//Point light addition
+const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
+//pLight.position.set(0, 4, 0); // close enough to table to see its pos 
+pLight.position.set(0, 6, 0); //starting pos
+pLight.intensity = 15.0;
+pLight.castShadow = true;
+scene.add(pLight);
+
+
+
+
+function keyHandler(e) {
+  switch(e.keyCode){
+    case 80: // The 'P' key
+        pLight.visible = !pLight.visible;
+    break;
+    case 77: // The 'M' key //still needs to be fixed
+        renderer.shadowMap.enabled = false;
+    break;
+    case 87: //The 'W' key //z = -4 at most
+        //
+    break;
+    case 83: //The 'S' key // z = 5 at most
+        // 
+    break;
+    case 65: //The 'A' key // x = -5 at most
+        //
+    break; 
+    case 68: //The 'D' key // x = 5 at most
+        //
+    break;
+
+  }
+}
+document.addEventListener( "keydown", keyHandler, false );
+
 
 // Render loop
 function animate() {
