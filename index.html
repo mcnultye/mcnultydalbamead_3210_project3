@@ -43,12 +43,6 @@ deck.shuffle(); // Shuffle the deck
 const playersCount = 3; // Number of players
 const piles = deck.deal(playersCount); // Create piles for each player
 
-const testGeometry = new THREE.BoxGeometry(0.2, 0.3, 0.01);
-const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
-const testCube = new THREE.Mesh(testGeometry, testMaterial);
-testCube.position.set(0, 0.7, 0); // Position it above the table
-scene.add(testCube);
-
 
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
@@ -174,7 +168,6 @@ function handleRound() {
     // Filter out players who still have cards in this round
     const activePlayers = cardsThisRound.filter(entry => entry !== null);
     if (activePlayers.length < 2) {
-        // Game over if less than 2 players remain
         console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
         return;
     }
@@ -186,11 +179,17 @@ function handleRound() {
     if (highestCards.length === 1) {
         // Single winner: move all displayed cards to the winner's pile
         const winnerIndex = highestCards[0].owner;
-        piles[winnerIndex].unshift(...displayedCards);
+        console.log(`Player ${winnerIndex + 1} wins this round!`); // Log winner
+        if (piles[winnerIndex]) { // Ensure winner's pile exists
+            piles[winnerIndex].unshift(...displayedCards);
+            console.log(`Added ${displayedCards.length} cards to Player ${winnerIndex + 1}'s pile.`);
+        } else {
+            console.error(`Winner index ${winnerIndex} is out of bounds for piles array.`);
+        }
         displayedCards = []; // Clear cards on the table
-        console.log(`Player ${winnerIndex + 1} wins this round!`);
     } else {
         // Tie detected - initiate a war
+        console.log("War initiated!");
         handleWar(highestCards.map(entry => entry.owner));
     }
 }
