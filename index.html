@@ -161,37 +161,37 @@ function animateCardMove(card, targetPosition) {
 }
 
 function handleRound() {
-    // Flip the top card for each player
     const cardsThisRound = piles.map((pile, index) => {
         if (pile.length > 0) {
             const card = pile.pop();
             displayedCards.push(card); // Track displayed cards on the table
             animateCardMove(card.obj, centerPositions[index]); // Animate card to center
-            return card;
+            return { owner: index, card: card };
         }
         return null; // If no cards, mark player as out
     });
 
-    // Filter players with cards
-    const activePlayers = cardsThisRound.filter(card => card !== null);
+    // Filter out players who still have cards in this round
+    const activePlayers = cardsThisRound.filter(entry => entry !== null);
     if (activePlayers.length < 2) {
+        // Game over if less than 2 players remain
         console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
         return;
     }
 
     // Determine if there's a tie for the highest card
-    const maxCardValue = Math.max(...activePlayers.map(card => card.value));
-    const highestCards = activePlayers.filter(card => card.value === maxCardValue);
+    const maxCardValue = Math.max(...activePlayers.map(entry => entry.card.value));
+    const highestCards = activePlayers.filter(entry => entry.card.value === maxCardValue);
 
     if (highestCards.length === 1) {
-        // Single winner takes all cards
-        const winner = highestCards[0].owner;
-        piles[winner].unshift(...displayedCards);
-        displayedCards = [];
-        console.log(`Player ${winner + 1} wins this round!`);
+        // Single winner: move all displayed cards to the winner's pile
+        const winnerIndex = highestCards[0].owner;
+        piles[winnerIndex].unshift(...displayedCards);
+        displayedCards = []; // Clear cards on the table
+        console.log(`Player ${winnerIndex + 1} wins this round!`);
     } else {
-        // Tie detected - start a war
-        handleWar(highestCards.map(card => card.owner));
+        // Tie detected - initiate a war
+        handleWar(highestCards.map(entry => entry.owner));
     }
 }
 
