@@ -28,9 +28,13 @@ var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
 renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 
  // Light Setup
+ var lights = []
  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+ ambientLight.castShadow = true;
+ lights.push(ambientLight);
  scene.add(ambientLight);
  
  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -39,7 +43,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
  directionalLight.shadow.mapSize.width = 1024;
  directionalLight.shadow.mapSize.length = 1024;
 
-
+ lights.push(directionalLight);
  scene.add(directionalLight);
 
  // Create a new deck and deal cards
@@ -409,6 +413,59 @@ document.addEventListener("keydown", (event) => {
         
     }
 });
+
+//Point light addition
+const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
+//pLight.position.set(0, 4, 0); // close enough to table to see its pos 
+pLight.position.set(0, 6, 0); //starting pos
+pLight.intensity = 15.0;
+pLight.castShadow = true;
+lights.push(pLight);
+scene.add(pLight);
+
+function shadowOnOff()
+{
+    for(let i = 0; i < lights.length; i++ )
+    {
+        lights[i].castShadow = !lights[i].castShadow;
+    }
+}
+
+
+
+function keyHandler(e) {
+  switch(e.keyCode){
+    case 80: // The 'P' key
+        pLight.visible = !pLight.visible;
+    break;
+    case 77: // The 'M' key //still needs to be fixed
+        shadowOnOff();
+    break;
+    case 87: //The 'W' key //z = -5 at most
+        if (pLight.position.z > -5) {
+                pLight.position.z -= 0.1;
+            }
+    break;
+    case 83: //The 'S' key // z = 5 at most
+        if (pLight.position.z < 5) {
+                pLight.position.z += 0.1;
+            }
+    break;
+    case 65: //The 'A' key // x = -5 at most
+        if (pLight.position.x > -5) {
+                pLight.position.x -= 0.1;
+            }
+    break; 
+    case 68: //The 'D' key // x = 5 at most
+    if (pLight.position.x < 5) {
+                pLight.position.x += 0.1;
+            }
+    break;
+
+  }
+}
+document.addEventListener( "keydown", keyHandler, false );
+
 
 // Render loop
 function animate() {
