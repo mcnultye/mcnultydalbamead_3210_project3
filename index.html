@@ -133,17 +133,25 @@ function keyHandler(e) {
     case 77: // The 'M' key //still needs to be fixed
         shadowOnOff();
     break;
-    case 87: //The 'W' key //z = -4 at most
-        //
+    case 87: //The 'W' key //z = -5 at most
+        if (pLight.position.z > -5) {
+                pLight.position.z -= 0.1;
+            }
     break;
     case 83: //The 'S' key // z = 5 at most
-        // 
+        if (pLight.position.z < 5) {
+                pLight.position.z += 0.1;
+            }
     break;
     case 65: //The 'A' key // x = -5 at most
-        //
+        if (pLight.position.x > -5) {
+                pLight.position.x -= 0.1;
+            }
     break; 
     case 68: //The 'D' key // x = 5 at most
-        //
+    if (pLight.position.x < 5) {
+                pLight.position.x += 0.1;
+            }
     break;
 
   }
