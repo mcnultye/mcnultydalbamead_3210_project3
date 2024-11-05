@@ -4,6 +4,11 @@
     <title>mcnultydalbamead_3210_project3</title>
 </head>
 <body>
+    <div id="scoreBoard">
+        <p>Player 1 Cards: <span id="player1Score">17</span></p>
+        <p>Player 2 Cards: <span id="player2Score">17</span></p>
+        <p>Player 3 Cards: <span id="player3Score">17</span></p>
+    </div>
 
     <canvas id="myCanvas"></canvas>
 
@@ -41,8 +46,20 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const deck = new Deck();
 deck.shuffle(); // Shuffle the deck
 const playersCount = 3; // Number of players
-const piles = deck.deal(playersCount); // Create piles for each player
 
+const cardsPerPlayer = Math.floor(deck.deck.length / playersCount);
+const totalCards = cardsPerPlayer * playersCount;
+
+// Discard extra cards so the deck divides evenly among players
+deck.deck = deck.deck.slice(0, totalCards);
+
+// Initialize piles for each player
+const piles = Array.from({ length: playersCount }, () => []);
+
+// Distribute the cards to each player's pile
+for (let i = 0; i < totalCards; i++) {
+    piles[i % playersCount].push(deck.deck[i]);
+}
 
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
@@ -154,6 +171,12 @@ function animateCardMove(card, targetPosition) {
     moveToCenter();
 }
 
+function updateScores() {
+    document.getElementById("player1Score").innerText = piles[0] ? piles[0].length : 0;
+    document.getElementById("player2Score").innerText = piles[1] ? piles[1].length : 0;
+    document.getElementById("player3Score").innerText = piles[2] ? piles[2].length : 0;
+}
+
 function handleRound() {
     const cardsThisRound = piles.map((pile, index) => {
         if (pile.length > 0) {
@@ -169,6 +192,7 @@ function handleRound() {
     const activePlayers = cardsThisRound.filter(entry => entry !== null);
     if (activePlayers.length < 2) {
         console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
+        updateScores();
         return;
     }
 
@@ -192,6 +216,7 @@ function handleRound() {
         console.log("War initiated!");
         handleWar(highestCards.map(entry => entry.owner));
     }
+    updateScores();
 }
 
 function handleWar(playersInWar) {
