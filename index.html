@@ -119,6 +119,8 @@ let centerPositions = [
     new THREE.Vector3(0, 4, -0.5)  // Position for Player 3's card in center
 ];
 let displayedCards = []; // Store cards in the current round
+let toMove = [];
+let playerW = -1;
 
 function animateCardMove(card, targetPosition) {
     const moveDuration = 1000; // 1-second animation for moving to the center
@@ -160,7 +162,7 @@ function animateCardMove(card, targetPosition) {
                 requestAnimationFrame(animateFlip);
             } else {
                 // Ensure it finishes exactly face-up and above the table
-                card.rotation.x = 0; // Face-up
+                card.rotation.x = -45; // Face-up
                 card.position.y = targetPosition.y + 0.01; // Slightly above table height
             }
         }
@@ -187,12 +189,13 @@ function handleRound() {
         }
         return null; // If no cards, mark player as out
     });
-
     // Filter out players who still have cards in this round
     const activePlayers = cardsThisRound.filter(entry => entry !== null);
     if (activePlayers.length < 2) {
         console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
         updateScores();
+        playerW = activePlayers[0];
+        toMove = displayedCards;
         return;
     }
 
@@ -207,6 +210,8 @@ function handleRound() {
         if (piles[winnerIndex]) { // Ensure winner's pile exists
             piles[winnerIndex].unshift(...displayedCards);
             console.log(`Added ${displayedCards.length} cards to Player ${winnerIndex + 1}'s pile.`);
+            playerW = winnerIndex;
+            toMove = displayedCards;
         } else {
             console.error(`Winner index ${winnerIndex} is out of bounds for piles array.`);
         }
@@ -250,6 +255,8 @@ function handleWar(playersInWar) {
         // Only one player remains after the war
         const solePlayer = activeWarPlayers[0].owner;
         piles[solePlayer].unshift(...displayedCards);
+        playerW = solePlayer;
+        toMove = displayedCards;
         displayedCards = [];
         console.log(`Player ${solePlayer + 1} wins all cards in the war!`);
         return;
@@ -263,6 +270,8 @@ function handleWar(playersInWar) {
         // War winner
         const warWinner = highestWarCards[0].owner;
         piles[warWinner].unshift(...displayedCards);
+        playerW = warWinner;
+        toMove = displayedCards;
         displayedCards = [];
         console.log(`Player ${warWinner + 1} wins all cards in the war!`);
     } else {
@@ -271,10 +280,94 @@ function handleWar(playersInWar) {
     }
 }
 
+
+//Moving the Cards Back
+function moveCardsToWinner(winner){
+    if(winner == 0){
+        toMove.forEach((card)=> {
+            createMovement(card.obj, new THREE.Vector3(-1.5,4,-1.25)); //-1.5,4,-1.25
+        });
+       
+    } else if (winner == 1){
+        toMove.forEach((card)=> {
+            createMovement(card.obj, new THREE.Vector3(1.5,4,-1.25)); //-1.25
+        });
+    } else if (winner == 2){
+        toMove.forEach((card)=> {
+            createMovement(card.obj, new THREE.Vector3(0,4,1.75)); //1.75
+        });
+    }
+}
+
+
+function createMovement(card, targetPosition){
+    const moveDuration = 1000; // 1-second animation for moving to the center
+    const flipDuration = 500;  // Half-second animation for the flip
+    const startPos = card.position.clone();
+    const startTime = Date.now();
+
+
+    // First phase: Move the card to the center
+    function moveToPile() {
+        const elapsedTime = Date.now() - startTime;
+        const t = Math.min(elapsedTime / moveDuration, 1);
+
+
+        // Move the card to the center position
+        card.position.lerpVectors(startPos, targetPosition, t);
+
+
+        if (t < 1) {
+            requestAnimationFrame(moveToPile);
+        } else {
+            // Once at the center, start the flip after a brief delay
+            setTimeout(flipBack, 200); // Delay before flipping
+        }
+    }
+
+
+    // Second phase: Flip the card to show the face-up side
+    function flipBack() {
+        const flipStartTime = Date.now();
+
+
+        function animateFlip() {
+            const flipElapsed = Date.now() - flipStartTime;
+            const t = Math.min(flipElapsed / flipDuration, 1);
+
+
+            // Rotate the card along the X-axis to flip it 180 degrees (face-up)
+            card.rotation.x = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
+
+
+            if (t < 1) {
+                requestAnimationFrame(animateFlip);
+            } else {
+                // Ensure it finishes exactly face-up and above the table
+                card.rotation.x = 90; // Face-down
+                card.position.y = targetPosition.y + 0.01; // Slightly above table height
+            }
+        }
+        animateFlip();
+    }
+
+
+    // Start the movement to the center
+    moveToPile();
+}
+
+let num = 1;
 // Key listener to start the round
 document.addEventListener("keydown", (event) => {
     if (event.key === 'N' || event.key === 'n') {
-        handleRound();
+        if(num == 1){
+            handleRound();
+            num++;
+        } else {
+            moveCardsToWinner(playerW);
+            setTimeout(handleRound, 2000);
+        }
+        
     }
 });
 
