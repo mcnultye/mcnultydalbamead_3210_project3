@@ -241,11 +241,12 @@ function handleWar(playersInWar) {
             // Normal war play: one face-down and one face-up card
             const faceDownCard = piles[playerIndex].pop();
             displayedCards.push(faceDownCard);
+            setTimeout(moveWarCardsFD, 2000, faceDownCard.obj, playerIndex);
             
             const faceUpCard = piles[playerIndex].pop();
             displayedCards.push(faceUpCard);
             warCards.push({ owner: playerIndex, card: faceUpCard });
-            animateCardMove(faceUpCard.obj, centerPositions[playerIndex]);
+            setTimeout(moveWarCardsFU, 3000, faceUpCard.obj, playerIndex);
         }
     });
 
@@ -285,22 +286,60 @@ function handleWar(playersInWar) {
 function moveCardsToWinner(winner){
     if(winner == 0){
         toMove.forEach((card)=> {
-            createMovement(card.obj, new THREE.Vector3(-1.5,4,-1.25)); //-1.5,4,-1.25
+            createMovement(card.obj, new THREE.Vector3(-1.5,4,-1.25),90); //-1.5,4,-1.25
         });
        
     } else if (winner == 1){
         toMove.forEach((card)=> {
-            createMovement(card.obj, new THREE.Vector3(1.5,4,-1.25)); //-1.25
+            createMovement(card.obj, new THREE.Vector3(1.5,4,-1.25),90); //-1.25
         });
     } else if (winner == 2){
         toMove.forEach((card)=> {
-            createMovement(card.obj, new THREE.Vector3(0,4,1.75)); //1.75
+            createMovement(card.obj, new THREE.Vector3(0,4,1.75),90); //1.75
         });
     }
+    toMove = [];
 }
 
+function moveWarCardsFD(card, player){
+    const moveDuration = 1000; // 1-second animation for moving to the center
+    const flipDuration = 500;  // Half-second animation for the flip
+    const startPos = card.position.clone();
+    const startTime = Date.now();
 
-function createMovement(card, targetPosition){
+    if(player == 0){
+        var targetPosition = new THREE.Vector3(-1,4,0);
+    } if(player == 1){
+        var targetPosition = new THREE.Vector3(1,4,0);
+    } if(player == 2)
+        var targetPosition = new THREE.Vector3(0,4,-1.5);
+
+    // First phase: Move the card to the center
+    function moveToPile() {
+        const elapsedTime = Date.now() - startTime;
+        const t = Math.min(elapsedTime / moveDuration, 1);
+        
+        card.position.lerpVectors(startPos, targetPosition, t);
+
+        if (t < 1) {
+            requestAnimationFrame(moveToPile);
+        }
+    }
+
+    moveToPile();
+
+}
+
+function moveWarCardsFU(card, player){
+    if(player == 0){
+        createMovement(card, new THREE.Vector3(-0.5,4,1),-45);
+    } if(player == 1){
+        createMovement(card, new THREE.Vector3(0.5,4,1),-45);
+    } if(player == 2)
+        createMovement(card, new THREE.Vector3(0,4,.5),-45);
+}
+
+function createMovement(card, targetPosition, angle){
     const moveDuration = 1000; // 1-second animation for moving to the center
     const flipDuration = 500;  // Half-second animation for the flip
     const startPos = card.position.clone();
@@ -344,7 +383,7 @@ function createMovement(card, targetPosition){
                 requestAnimationFrame(animateFlip);
             } else {
                 // Ensure it finishes exactly face-up and above the table
-                card.rotation.x = 90; // Face-down
+                card.rotation.x = angle; // Face-down
                 card.position.y = targetPosition.y + 0.01; // Slightly above table height
             }
         }
