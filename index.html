@@ -26,7 +26,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 
  // Light Setup
+ var lights = []
  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+ ambientLight.castShadow = true;
+ lights.push(ambientLight);
  scene.add(ambientLight);
  
  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -35,7 +38,7 @@ renderer.shadowMap.enabled = true;
  directionalLight.shadow.mapSize.width = 1024;
  directionalLight.shadow.mapSize.length = 1024;
 
-
+ lights.push(directionalLight);
  scene.add(directionalLight);
 
  // Create a new deck and deal cards
@@ -109,8 +112,16 @@ const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
 pLight.position.set(0, 6, 0); //starting pos
 pLight.intensity = 15.0;
 pLight.castShadow = true;
+lights.push(pLight);
 scene.add(pLight);
 
+function shadowOnOff()
+{
+    for(let i = 0; i < lights.length; i++ )
+    {
+        lights[i].castShadow = !lights[i].castShadow;
+    }
+}
 
 
 
@@ -120,7 +131,7 @@ function keyHandler(e) {
         pLight.visible = !pLight.visible;
     break;
     case 77: // The 'M' key //still needs to be fixed
-        renderer.shadowMap.enabled = false;
+        shadowOnOff();
     break;
     case 87: //The 'W' key //z = -4 at most
         //
