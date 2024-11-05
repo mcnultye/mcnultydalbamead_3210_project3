@@ -399,8 +399,11 @@ function keyHandler(e) {
     case 80: // The 'P' key
         pLight.visible = !pLight.visible;
     break;
-    case 77: // The 'M' key //still needs to be fixed
+    case 77: // The 'M' key 
         shadowOnOff();
+    break;
+    case 76: // The 'L' key
+        ambientLight.visible = !ambientLight.visible;
     break;
     case 87: //The 'W' key //z = -5 at most
         if (pLight.position.z > -5) {
