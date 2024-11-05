@@ -43,12 +43,6 @@ deck.shuffle(); // Shuffle the deck
 const playersCount = 3; // Number of players
 const piles = deck.deal(playersCount); // Create piles for each player
 
-const testGeometry = new THREE.BoxGeometry(0.2, 0.3, 0.01);
-const testMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
-const testCube = new THREE.Mesh(testGeometry, testMaterial);
-testCube.position.set(0, 0.7, 0); // Position it above the table
-scene.add(testCube);
-
 
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
@@ -101,6 +95,163 @@ scene.add(testCube);
         });
     });
 }
+
+let centerPositions = [
+    new THREE.Vector3(-0.5, 4, 0), // Position for Player 1's card in center
+    new THREE.Vector3(0.5, 4, 0),  // Position for Player 2's card in center
+    new THREE.Vector3(0, 4, -0.5)  // Position for Player 3's card in center
+];
+let displayedCards = []; // Store cards in the current round
+
+function animateCardMove(card, targetPosition) {
+    const moveDuration = 1000; // 1-second animation for moving to the center
+    const flipDuration = 500;  // Half-second animation for the flip
+    const startPos = card.position.clone();
+    const startTime = Date.now();
+
+    // Set the initial rotation to face down
+    card.rotation.set(Math.PI / 2, 0, 0); // Start with the card facing down
+
+    // First phase: Move the card to the center
+    function moveToCenter() {
+        const elapsedTime = Date.now() - startTime;
+        const t = Math.min(elapsedTime / moveDuration, 1);
+
+        // Move the card to the center position
+        card.position.lerpVectors(startPos, targetPosition, t);
+
+        if (t < 1) {
+            requestAnimationFrame(moveToCenter);
+        } else {
+            // Once at the center, start the flip after a brief delay
+            setTimeout(flipCard, 200); // Delay before flipping
+        }
+    }
+
+    // Second phase: Flip the card to show the face-up side
+    function flipCard() {
+        const flipStartTime = Date.now();
+
+        function animateFlip() {
+            const flipElapsed = Date.now() - flipStartTime;
+            const t = Math.min(flipElapsed / flipDuration, 1);
+
+            // Rotate the card along the X-axis to flip it 180 degrees (face-up)
+            card.rotation.x = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
+
+            if (t < 1) {
+                requestAnimationFrame(animateFlip);
+            } else {
+                // Ensure it finishes exactly face-up and above the table
+                card.rotation.x = 0; // Face-up
+                card.position.y = targetPosition.y + 0.01; // Slightly above table height
+            }
+        }
+        animateFlip();
+    }
+
+    // Start the movement to the center
+    moveToCenter();
+}
+
+function handleRound() {
+    const cardsThisRound = piles.map((pile, index) => {
+        if (pile.length > 0) {
+            const card = pile.pop();
+            displayedCards.push(card); // Track displayed cards on the table
+            animateCardMove(card.obj, centerPositions[index]); // Animate card to center
+            return { owner: index, card: card };
+        }
+        return null; // If no cards, mark player as out
+    });
+
+    // Filter out players who still have cards in this round
+    const activePlayers = cardsThisRound.filter(entry => entry !== null);
+    if (activePlayers.length < 2) {
+        console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
+        return;
+    }
+
+    // Determine if there's a tie for the highest card
+    const maxCardValue = Math.max(...activePlayers.map(entry => entry.card.value));
+    const highestCards = activePlayers.filter(entry => entry.card.value === maxCardValue);
+
+    if (highestCards.length === 1) {
+        // Single winner: move all displayed cards to the winner's pile
+        const winnerIndex = highestCards[0].owner;
+        console.log(`Player ${winnerIndex + 1} wins this round!`); // Log winner
+        if (piles[winnerIndex]) { // Ensure winner's pile exists
+            piles[winnerIndex].unshift(...displayedCards);
+            console.log(`Added ${displayedCards.length} cards to Player ${winnerIndex + 1}'s pile.`);
+        } else {
+            console.error(`Winner index ${winnerIndex} is out of bounds for piles array.`);
+        }
+        displayedCards = []; // Clear cards on the table
+    } else {
+        // Tie detected - initiate a war
+        console.log("War initiated!");
+        handleWar(highestCards.map(entry => entry.owner));
+    }
+}
+
+function handleWar(playersInWar) {
+    console.log("War initiated!");
+
+    const warCards = [];
+    playersInWar.forEach(playerIndex => {
+        if (piles[playerIndex].length < 2) {
+            // Player has fewer than 2 cards - use last available card as final face-up
+            const finalCard = piles[playerIndex].pop();
+            if (finalCard) {
+                displayedCards.push(finalCard);
+                warCards.push({ owner: playerIndex, card: finalCard });
+                animateCardMove(finalCard.obj, centerPositions[playerIndex]);
+            }
+        } else {
+            // Normal war play: one face-down and one face-up card
+            const faceDownCard = piles[playerIndex].pop();
+            displayedCards.push(faceDownCard);
+            
+            const faceUpCard = piles[playerIndex].pop();
+            displayedCards.push(faceUpCard);
+            warCards.push({ owner: playerIndex, card: faceUpCard });
+            animateCardMove(faceUpCard.obj, centerPositions[playerIndex]);
+        }
+    });
+
+    // Active players in the war with cards on the table
+    const activeWarPlayers = warCards.filter(warCard => warCard !== null);
+    if (activeWarPlayers.length < 2) {
+        // Only one player remains after the war
+        const solePlayer = activeWarPlayers[0].owner;
+        piles[solePlayer].unshift(...displayedCards);
+        displayedCards = [];
+        console.log(`Player ${solePlayer + 1} wins all cards in the war!`);
+        return;
+    }
+
+    // Check if there's a tie among war cards
+    const maxWarValue = Math.max(...activeWarPlayers.map(warCard => warCard.card.value));
+    const highestWarCards = activeWarPlayers.filter(warCard => warCard.card.value === maxWarValue);
+
+    if (highestWarCards.length === 1) {
+        // War winner
+        const warWinner = highestWarCards[0].owner;
+        piles[warWinner].unshift(...displayedCards);
+        displayedCards = [];
+        console.log(`Player ${warWinner + 1} wins all cards in the war!`);
+    } else {
+        // War continues with new face-down and face-up cards
+        handleWar(highestWarCards.map(warCard => warCard.owner));
+    }
+}
+
+// Key listener to start the round
+document.addEventListener("keydown", (event) => {
+    if (event.key === 'N' || event.key === 'n') {
+        handleRound();
+    }
+});
 
 // Render loop
 function animate() {
