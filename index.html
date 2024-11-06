@@ -98,8 +98,6 @@ for (let i = 0; i < totalCards; i++) {
       new THREE.Vector3(0, 3.8, 1.75)
   ];
 
-  const tableYPosition = 0.15;
-
      // Position the cards for each player
      piles.forEach((pile, index) => {
         pile.forEach((card, cardIndex) => {
@@ -118,8 +116,7 @@ for (let i = 0; i < totalCards; i++) {
     card.obj.rotation.set(Math.PI / 2, 0, -Math.PI / 2); // Flat, facing inward (right)
 } else {
     // Front pile: Cards should be flat and facing down
-    card.obj.rotation.set(Math.PI / 2, tableRotationY, 0); // Flat, facing down
-    //card.obj.position.y = Math.max(card.obj.position.y, tableYPosition + 0.2); // Raise the front pile cards
+    card.obj.rotation.set(Math.PI / 2, 0, 0); // Flat, facing down
 }
 
 
