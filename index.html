@@ -73,15 +73,18 @@ for (let i = 0; i < totalCards; i++) {
     model.scale.set(0.4, 0.4, 0.4);
     model.position.set(0.25, 0.15, 0);
 
+
+    const tableRotationY = model.rotation.y; // Get the table's Y rotation
+
     model.traverse(function(node) {
         if(node.isMesh) {
             node.receiveShadow = true;
         }
     })
-    positionCards();
+    positionCards(tableRotationY);
  });
 
- function positionCards() {
+ function positionCards(tableRotationY) {
     // Check if piles are created
     if (piles.length === 0) {
         console.log("No piles available.");
@@ -90,9 +93,9 @@ for (let i = 0; i < totalCards; i++) {
 
       // Create positions for the cards
       const pilePositions = [
-      new THREE.Vector3(-1.5, 4, -1.25), // Adjusted Y for height above table
-      new THREE.Vector3(1.5, 4, -1.25),
-      new THREE.Vector3(0, 4, 1.75)
+      new THREE.Vector3(-2.8, 3.8, 0), // Left side of the table
+      new THREE.Vector3(2.8, 3.8, 0),   // Right side of the table
+      new THREE.Vector3(0, 3.8, 1.75)
   ];
 
      // Position the cards for each player
@@ -104,7 +107,20 @@ for (let i = 0; i < totalCards; i++) {
             // Position the card
             card.obj.position.set(position.x, position.y + offset, position.z);
             card.obj.scale.set(1, 1, 1); // Ensure cards are not scaled down
-            card.obj.rotateX(90);
+  // Adjust rotations for each pile
+  if (index === 0) {
+    // Left pile: Cards should lie flat and face the center from the left
+    card.obj.rotation.set(-Math.PI / 2, Math.PI, Math.PI / 2); // Flat, facing inward (left)
+} else if (index === 1) {
+    // Right pile: Cards should lie flat and face the center from the right
+    card.obj.rotation.set(Math.PI / 2, 0, -Math.PI / 2); // Flat, facing inward (right)
+} else {
+    // Front pile: Cards should be flat and facing down
+    card.obj.rotation.set(Math.PI / 2, 0, 0); // Flat, facing down
+}
+
+
+
             scene.add(card.obj);
 
             // Debugging: Log card information
@@ -438,8 +454,11 @@ function keyHandler(e) {
     case 80: // The 'P' key
         pLight.visible = !pLight.visible;
     break;
-    case 77: // The 'M' key //still needs to be fixed
+    case 77: // The 'M' key 
         shadowOnOff();
+    break;
+    case 76: // The 'L' key
+        ambientLight.visible = !ambientLight.visible;
     break;
     case 87: //The 'W' key //z = -5 at most
         if (pLight.position.z > -5) {
