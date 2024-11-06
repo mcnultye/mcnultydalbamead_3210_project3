@@ -90,10 +90,11 @@ for (let i = 0; i < totalCards; i++) {
 
       // Create positions for the cards
       const pilePositions = [
-      new THREE.Vector3(-1.5, 4, -1.25), // Adjusted Y for height above table
-      new THREE.Vector3(1.5, 4, -1.25),
+      new THREE.Vector3(-2.8, 4, 0), // Left side of the table
+      new THREE.Vector3(2.8, 4, 0),   // Right side of the table
       new THREE.Vector3(0, 4, 1.75)
   ];
+
 
      // Position the cards for each player
      piles.forEach((pile, index) => {
