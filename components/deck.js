@@ -67,9 +67,9 @@ createCardObject(texture) {
     var geometry = new THREE.BoxGeometry(.4, .6, .001);
 
     // Define materials for each face of the card
-    var frontMaterial = new THREE.MeshBasicMaterial({ map: texture }); // Card front with custom texture
-    var backMaterial = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('components/cardT/back.png') }); // Card back texture
-    var sideMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 }); // Sides, simple black color
+    var frontMaterial = new THREE.MeshStandardMaterial({ map: texture }); // Card front with custom texture
+    var backMaterial = new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load('components/cardT/back.png') }); // Card back texture
+    var sideMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Sides, simple black color
 
     var materials = [
         sideMaterial, // right
