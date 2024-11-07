@@ -170,13 +170,27 @@ for (let i = 0; i < totalCards; i++) {
 
 
 let centerPositions = [
-    new THREE.Vector3(-0.5, 3.8, 0), // Position for Player 1's card in center
-    new THREE.Vector3(0.5, 3.8, 0),  // Position for Player 2's card in center
+    new THREE.Vector3(-0.6, 3.8, 0), // Position for Player 1's card in center
+    new THREE.Vector3(0.6, 3.8, 0),  // Position for Player 2's card in center
     new THREE.Vector3(0, 3.8, -0.5)  // Position for Player 3's card in center
 ];
 let displayedCards = []; // Store cards in the current round
 let toMove = [];
 let playerW = -1;
+
+function moveCardsToCenter(card, player){
+    if(player == 0){
+        createMovement(card, centerPositions[player]);
+        flipWar(card, centerPositions[player],-80.1,500);
+    } if(player == 1){
+        createMovement(card, centerPositions[player]);
+        flipWar(card, centerPositions[player],80.1,500);
+    } if(player == 2){
+        createMovement(card, centerPositions[player]);
+        flipWar(card, centerPositions[player],80.1,500);
+    }
+}
+
 
 function animateCardMove(card, targetPosition) {
     const moveDuration = 1000; // 1-second animation for moving to the center
@@ -240,7 +254,8 @@ function handleRound() {
         if (pile.length > 0) {
             const card = pile.pop();
             displayedCards.push(card); // Track displayed cards on the table
-            animateCardMove(card.obj, centerPositions[index]); // Animate card to center
+
+            moveCardsToCenter(card.obj, index); // Animate card to center
             return { owner: index, card: card };
         }
         return null; // If no cards, mark player as out
@@ -366,9 +381,9 @@ function moveWarCardsFD(card, player){
     const startTime = Date.now();
 
     if(player == 0){
-        var targetPosition = new THREE.Vector3(-1.1,3.8,0);
+        var targetPosition = new THREE.Vector3(-1.5,3.8,0);
     } if(player == 1){
-        var targetPosition = new THREE.Vector3(1.1,3.8,0);
+        var targetPosition = new THREE.Vector3(1.5,3.8,0);
     } if(player == 2)
         var targetPosition = new THREE.Vector3(0,3.8,-1.5);
 
@@ -391,13 +406,15 @@ function moveWarCardsFD(card, player){
 function moveWarCardsFU(card, player){
     if(player == 0){
         createMovement(card, new THREE.Vector3(-0.6,3.8,1));
-        flipWar2(card, new THREE.Vector3(-0.6,3.8,1),180,500);
+        flipWar(card, new THREE.Vector3(-0.6,3.8,1),-80.1,500);
     } if(player == 1){
         createMovement(card, new THREE.Vector3(0.6,3.8,1));
-        flipWar(card, new THREE.Vector3(0.6,3.8,1),110,500);
-    } if(player == 2)
+        flipWar(card, new THREE.Vector3(0.6,3.8,1),80.1,500);
+    } if(player == 2){
         createMovement(card, new THREE.Vector3(0,3.8,.5));
         flipWar(card, new THREE.Vector3(0,3.8,.5),80.1,500);
+    }
+        
 }
 
 function createMovement(card, targetPosition){
@@ -445,24 +462,6 @@ function flipWar(card, targetPosition, angle, flipDuration) {
         animateFlip();
     }
 
-function flipWar2(card, targetPosition, angle, flipDuration) {
-    const flipStartTime = Date.now();
-    
-    function animateFlip() {
-        const flipElapsed = Date.now() - flipStartTime;
-        const t = Math.min(flipElapsed / flipDuration, 1);
-
-        card.rotation.y = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
-
-        if (t < 1) {
-            requestAnimationFrame(animateFlip);
-        } else {
-                card.rotation.x = angle; // Face-down
-                card.position.y = targetPosition.y ; // Slightly above table height
-            }
-        }
-        animateFlip();
-    }
     
 // Second phase: Flip the card to show the face-up side
 function flipAfterWin(card,x,y,z,flipDuration,angle) {
