@@ -411,14 +411,14 @@ function moveWarCardsFD(card, player){
 
 function moveWarCardsFU(card, player){
     if(player == 0){
-        createMovement(card, new THREE.Vector3(-1.2,3.8,.5));
-        flipWar(card, new THREE.Vector3(-1.2,3.8,.5),-80.1,500);
+        createMovement(card, new THREE.Vector3(-2,3.8,.5));
+        flipWar(card, new THREE.Vector3(-2,3.8,.5),-80.1,500);
     } if(player == 1){
-        createMovement(card, new THREE.Vector3(1.2,3.8,.5));
-        flipWar(card, new THREE.Vector3(1.2,3.8,.5),80.1,500);
+        createMovement(card, new THREE.Vector3(2,3.8,.5));
+        flipWar(card, new THREE.Vector3(2,3.8,.5),80.1,500);
     } if(player == 2){
-        createMovement(card, new THREE.Vector3(.5,3.8,.2));
-        flipWar(card, new THREE.Vector3(.5,3.8,.2),80.1,500);
+        createMovement(card, new THREE.Vector3(.5,3.8,1));
+        flipWar(card, new THREE.Vector3(.5,3.8,1),80.1,500);
     }
         
 }
