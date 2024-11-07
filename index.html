@@ -275,7 +275,7 @@ function handleRound() {
     } else {
         // Tie detected - initiate a war
         console.log("War initiated!");
-        handleWar(highestCards.map(entry => entry.owner));
+        handleWar(cardsThisRound.map(entry => entry.owner));
     }
     updateScores();
 }
