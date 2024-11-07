@@ -456,7 +456,7 @@ function flipWar(card, targetPosition, angle, flipDuration) {
         const flipElapsed = Date.now() - flipStartTime;
         const t = Math.min(flipElapsed / flipDuration, 1);
 
-        card.rotation.x = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
+        card.rotation.x = angle/34*(1-t); // Ends at 0 (face-up)
 
         if (t < 1) {
             requestAnimationFrame(animateFlip);
