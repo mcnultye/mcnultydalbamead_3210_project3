@@ -16,6 +16,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Deck from './components/deck.js';
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
+RectAreaLightUniformsLib.init();
 
 var scene = new THREE.Scene();
 
@@ -417,6 +419,12 @@ pLight.shadow.bias = -0.001
 lights.push(pLight);
 scene.add(pLight);
 
+//rect light
+const rectLight = new THREE.RectAreaLight(0xffffff, 4, 4, 2);
+rectLight.position.set(0, 6, 0); 
+rectLight.lookAt(0, 0, 0); 
+scene.add(rectLight);
+
 function shadowOnOff()
 {
     for(let i = 0; i < lights.length; i++ )
@@ -458,6 +466,9 @@ function keyHandler(e) {
     if (pLight.position.x < 4) {
                 pLight.position.x += 0.1;
             }
+    break;
+    case 82: //The 'R' key to toggle on and off rectlight
+        rectLight.visible = !rectLight.visible;
     break;
   }
 }
