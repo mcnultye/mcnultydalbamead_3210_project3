@@ -406,8 +406,7 @@ function flipAfterWin(card,x,y,z,flipDuration,angle) {
                 requestAnimationFrame(animateFlip);
             } else {
                 // Ensure it finishes exactly face-up and above the table
-                card.rotation.x = angle; // Face-down
-                card.position.y = targetPosition.y; // Slightly above table height
+                card.rotation.set(x,y,z); // Face-down
             }
         }
         animateFlip();
