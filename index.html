@@ -39,11 +39,13 @@
             left: 20px;
             color: white;
             font-size: 20px;
+            visibility: visible !important;  /* Makes sure it's visible */
+            display: block !important;
         }
     </style>
 </head>
 <body>
-    <div id="scoreBoard">
+    <div id="scoreBoard" style="visibility: visible;">
         <p>Player 1 Cards: <span id="player1Score">0</span></p>
         <p>Player 2 Cards: <span id="player2Score">0</span></p>
         <p>Player 3 Cards: <span id="player3Score">0</span></p>
@@ -256,6 +258,9 @@ function updateScores() {
     document.getElementById("player2Score").innerText = piles[1] ? piles[1].length : 0;
     document.getElementById("player3Score").innerText = piles[2] ? piles[2].length : 0;
 }
+
+document.getElementById("scoreBoard").style.display = 'block';
+
 
 function handleRound() {
     const cardsThisRound = piles.map((pile, index) => {
@@ -574,11 +579,14 @@ function animate() {
     renderer.render(scene, camera);
 
 }
+
+
   document.getElementById('startButton').addEventListener('click', () => {
     setupScene();  // Start the game setup and Three.js scene
  
     // Hide the start button after the game starts
     document.getElementById('startButton').style.display = 'none';
+
  
     animate(); // Begin the animation loop
  });
