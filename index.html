@@ -285,6 +285,7 @@ function handleRound() {
     updateScores();
 }
 
+// Function to handle wars
 function handleWar(playersInWar) {
     console.log("War initiated!");
 
@@ -579,6 +580,8 @@ function animate() {
     renderer.render(scene, camera);
 
 }
+
+//setup for scene after the start button is pressed
   document.getElementById('startButton').addEventListener('click', () => {
     setupScene();  // Start the game setup and Three.js scene
  
