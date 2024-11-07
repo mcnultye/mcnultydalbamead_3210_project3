@@ -33,7 +33,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 
  // Light Setup
- const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+ const ambientLight = new THREE.AmbientLight(0x0000ff, 0.75);
  scene.add(ambientLight);
 
  // Create a new deck and deal cards
@@ -408,7 +408,7 @@ document.addEventListener("keydown", (event) => {
 const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
 //pLight.position.set(0, 4, 0); // close enough to table to see its pos 
 pLight.position.set(0, 6, 0); //starting pos
-pLight.intensity = 10.0;
+pLight.intensity = 7.0;
 pLight.castShadow = true;
 pLight.shadow.mapSize.width = 5000;
 pLight.shadow.mapSize.length = 5000;
@@ -416,7 +416,7 @@ pLight.shadow.bias = -0.001
 scene.add(pLight);
 
 //rect light
-const rectLight = new THREE.RectAreaLight(0xffffff, 4, 4, 2);
+const rectLight = new THREE.RectAreaLight(0xffffff, 2, 4, 2);
 rectLight.position.set(0, 6, 0); 
 rectLight.lookAt(0, 0, 0); 
 scene.add(rectLight);
