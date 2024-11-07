@@ -36,15 +36,6 @@ renderer.shadowMap.enabled = true;
  ambientLight.castShadow = true;
  lights.push(ambientLight);
  scene.add(ambientLight);
- 
- const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
- directionalLight.position.y = 10;
- directionalLight.castShadow = true;
- directionalLight.shadow.mapSize.width = 1024;
- directionalLight.shadow.mapSize.length = 1024;
-
- lights.push(directionalLight);
- scene.add(directionalLight);
 
  // Create a new deck and deal cards
 const deck = new Deck();
@@ -468,10 +459,6 @@ function keyHandler(e) {
                 pLight.position.x += 0.1;
             }
     break;
-    case 89: //The 'Y' key //toggles directional light on and off
-        directionalLight.visible = !directionalLight.visible;
-    break;
-
   }
 }
 document.addEventListener( "keydown", keyHandler, false );
