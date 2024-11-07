@@ -2,13 +2,53 @@
 <html>
 <head>
     <title>mcnultydalbamead_3210_project3</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background-color: #000;
+        }
+
+        /* Fullscreen canvas for Three.js */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Start button styling */
+        #startButton {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Scoreboard styling */
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
     <div id="scoreBoard">
-        <p>Player 1 Cards: <span id="player1Score">17</span></p>
-        <p>Player 2 Cards: <span id="player2Score">17</span></p>
-        <p>Player 3 Cards: <span id="player3Score">17</span></p>
+        <p>Player 1 Cards: <span id="player1Score">0</span></p>
+        <p>Player 2 Cards: <span id="player2Score">0</span></p>
+        <p>Player 3 Cards: <span id="player3Score">0</span></p>
     </div>
+    <div id="startButton">Click to Start Game</div>
 
     <canvas id="myCanvas"></canvas>
 
@@ -19,14 +59,19 @@ import Deck from './components/deck.js';
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
 RectAreaLightUniformsLib.init();
 
-var scene = new THREE.Scene();
+ // Declare global variables
+ var scene, camera, renderer;
 
-var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 3000 );
+
+function setupScene() {
+scene = new THREE.Scene();
+camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 3000 );
+
 camera.position.set(0, 9, 6);
 camera.lookAt( new THREE.Vector3(0.0,6.0,2.0));
 scene.add( camera );
 
-var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
+renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
 renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -35,6 +80,28 @@ renderer.shadowMap.enabled = true;
  // Light Setup
  const ambientLight = new THREE.AmbientLight(0x0000ff, 0.75);
  scene.add(ambientLight);
+ //Point light addition
+const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
+//pLight.position.set(0, 4, 0); // close enough to table to see its pos 
+pLight.position.set(0, 6, 0); //starting pos
+pLight.intensity = 7.0;
+pLight.castShadow = true;
+pLight.shadow.mapSize.width = 5000;
+pLight.shadow.mapSize.length = 5000;
+pLight.shadow.bias = -0.001
+scene.add(pLight);
+
+//rect light
+const rectLight = new THREE.RectAreaLight(0xffffff, 2, 4, 2);
+rectLight.position.set(0, 6, 0); 
+rectLight.lookAt(0, 0, 0); 
+scene.add(rectLight);
+
+let shadowsEnabled = true;
+
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; //to help with shadow smoothness
+
+
 
  // Create a new deck and deal cards
 const deck = new Deck();
@@ -122,6 +189,7 @@ for (let i = 0; i < totalCards; i++) {
         });
     });
 }
+
 
 let centerPositions = [
     new THREE.Vector3(-0.5, 3.8, 0), // Position for Player 1's card in center
@@ -245,18 +313,18 @@ function handleWar(playersInWar) {
             if (finalCard) {
                 displayedCards.push(finalCard);
                 warCards.push({ owner: playerIndex, card: finalCard });
-                animateCardMove(finalCard.obj, centerPositions[playerIndex]);
+                setTimeout(moveWarCardsFU, 1500, finalCard.obj, playerIndex);
             }
         } else {
             // Normal war play: one face-down and one face-up card
             const faceDownCard = piles[playerIndex].pop();
             displayedCards.push(faceDownCard);
-            setTimeout(moveWarCardsFD, 2000, faceDownCard.obj, playerIndex);
+            setTimeout(moveWarCardsFD, 1000, faceDownCard.obj, playerIndex);
             
             const faceUpCard = piles[playerIndex].pop();
             displayedCards.push(faceUpCard);
             warCards.push({ owner: playerIndex, card: faceUpCard });
-            setTimeout(moveWarCardsFU, 3000, faceUpCard.obj, playerIndex);
+            setTimeout(moveWarCardsFU, 1500, faceUpCard.obj, playerIndex);
         }
     });
 
@@ -295,18 +363,18 @@ function handleWar(playersInWar) {
 function moveCardsToWinner(winner){
     if(winner == 0){
         toMove.forEach((card)=> {
-            flipAfterWin(card.obj, -Math.PI / 2, Math.PI,Math.PI / 2,500, -1.45);
+            flipAfterWin(card.obj, -Math.PI / 2, Math.PI,Math.PI / 2,500);
             createMovement(card.obj, new THREE.Vector3(-2.8, piles[winner][0].obj.position.y - .005, 0)); 
         });
        
     } else if (winner == 1){
         toMove.forEach((card)=> {
-            flipAfterWin(card.obj, Math.PI / 2, 0, -Math.PI / 2,500, 1.45);
+            flipAfterWin(card.obj, Math.PI / 2, 0, -Math.PI / 2,500);
             createMovement(card.obj, new THREE.Vector3(2.8,piles[winner][0].obj.position.y - .005,0));
         });
     } else if (winner == 2){
         toMove.forEach((card)=> {
-            flipAfterWin(card.obj, Math.PI / 2, 0,0,500, 1.5);
+            flipAfterWin(card.obj, Math.PI / 2, 0,0,500);
             createMovement(card.obj, new THREE.Vector3(0, piles[winner][0].obj.position.y - .005, 1.75));
         });
     }
@@ -344,14 +412,17 @@ function moveWarCardsFD(card, player){
 
 function moveWarCardsFU(card, player){
     if(player == 0){
-        createMovement(card, new THREE.Vector3(-0.5,3.8,1),-45);
+        createMovement(card, new THREE.Vector3(-0.6,3.8,1));
+        flipWar2(card, new THREE.Vector3(-0.6,3.8,1),180,500);
     } if(player == 1){
-        createMovement(card, new THREE.Vector3(0.5,3.8,1),-45);
+        createMovement(card, new THREE.Vector3(0.6,3.8,1));
+        flipWar(card, new THREE.Vector3(0.6,3.8,1),110,500);
     } if(player == 2)
-        createMovement(card, new THREE.Vector3(0,3.8,.5),-45);
+        createMovement(card, new THREE.Vector3(0,3.8,.5));
+        flipWar(card, new THREE.Vector3(0,3.8,.5),80.1,500);
 }
 
-function createMovement(card, targetPosition, angle){
+function createMovement(card, targetPosition){
     const moveDuration = 1000; // 1-second animation for moving to the center
     const flipDuration = 500;  // Half-second animation for the flip
     const startPos = card.position.clone();
@@ -373,11 +444,48 @@ function createMovement(card, targetPosition, angle){
         } 
     }
 
-
     // Start the movement to the center
     moveToPile();
 }
 
+function flipWar(card, targetPosition, angle, flipDuration) {
+    const flipStartTime = Date.now();
+    
+    function animateFlip() {
+        const flipElapsed = Date.now() - flipStartTime;
+        const t = Math.min(flipElapsed / flipDuration, 1);
+
+        card.rotation.x = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
+
+        if (t < 1) {
+            requestAnimationFrame(animateFlip);
+        } else {
+                card.rotation.x = angle; // Face-down
+                card.position.y = targetPosition.y ; // Slightly above table height
+            }
+        }
+        animateFlip();
+    }
+
+function flipWar2(card, targetPosition, angle, flipDuration) {
+    const flipStartTime = Date.now();
+    
+    function animateFlip() {
+        const flipElapsed = Date.now() - flipStartTime;
+        const t = Math.min(flipElapsed / flipDuration, 1);
+
+        card.rotation.y = Math.PI / 2 * (1 - t); // Ends at 0 (face-up)
+
+        if (t < 1) {
+            requestAnimationFrame(animateFlip);
+        } else {
+                card.rotation.x = angle; // Face-down
+                card.position.y = targetPosition.y ; // Slightly above table height
+            }
+        }
+        animateFlip();
+    }
+    
 // Second phase: Flip the card to show the face-up side
 function flipAfterWin(card,x,y,z,flipDuration,angle) {
         const flipStartTime = Date.now();
@@ -411,22 +519,21 @@ document.addEventListener("keydown", (event) => {
             num++;
         } else {
             moveCardsToWinner(playerW);
-            setTimeout(handleRound, 2000);
+            setTimeout(handleRound, 1000);
         }
         
     }
 });
 
 //Point light addition
-const pLight = new THREE.PointLight(0xffffff, 1.0, 20, 2.0);
+const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
 //pLight.position.set(0, 4, 0); // close enough to table to see its pos 
 pLight.position.set(0, 6, 0); //starting pos
-pLight.intensity = 8.0;
+pLight.intensity = 7.0;
 pLight.castShadow = true;
 pLight.shadow.mapSize.width = 5000;
 pLight.shadow.mapSize.length = 5000;
-pLight.shadow.bias = -0.003;
-pLight.shadow.radius = 6;
+pLight.shadow.bias = -0.001
 scene.add(pLight);
 
 //rect light
@@ -481,14 +588,21 @@ function keyHandler(e) {
 }
 document.addEventListener( "keydown", keyHandler, false );
 
-
+}
 // Render loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
 }
-animate();    
+  document.getElementById('startButton').addEventListener('click', () => {
+    setupScene();  // Start the game setup and Three.js scene
+ 
+    // Hide the start button after the game starts
+    document.getElementById('startButton').style.display = 'none';
+ 
+    animate(); // Begin the animation loop
+ });
 </script>
 </body>
 </html>
