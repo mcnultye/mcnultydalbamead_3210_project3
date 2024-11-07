@@ -2,13 +2,53 @@
 <html>
 <head>
     <title>mcnultydalbamead_3210_project3</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background-color: #000;
+        }
+
+        /* Fullscreen canvas for Three.js */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Start button styling */
+        #startButton {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Scoreboard styling */
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
     <div id="scoreBoard">
-        <p>Player 1 Cards: <span id="player1Score">17</span></p>
-        <p>Player 2 Cards: <span id="player2Score">17</span></p>
-        <p>Player 3 Cards: <span id="player3Score">17</span></p>
+        <p>Player 1 Cards: <span id="player1Score">0</span></p>
+        <p>Player 2 Cards: <span id="player2Score">0</span></p>
+        <p>Player 3 Cards: <span id="player3Score">0</span></p>
     </div>
+    <div id="startButton">Click to Start Game</div>
 
     <canvas id="myCanvas"></canvas>
 
@@ -19,20 +59,25 @@ import Deck from './components/deck.js';
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
 RectAreaLightUniformsLib.init();
 
-var scene = new THREE.Scene();
+ // Declare global variables
+ var scene, camera, renderer;
 
-var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 3000 );
+
+function setupScene() {
+scene = new THREE.Scene();
+camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 3000 );
+
 camera.position.set(0, 9, 6);
 camera.lookAt( new THREE.Vector3(0.0,6.0,2.0));
 scene.add( camera );
 
-var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
+renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
 renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 
- // Light Setup
+ // Ambient Light Setup
  const ambientLight = new THREE.AmbientLight(0x0000ff, 0.75);
  scene.add(ambientLight);
 
@@ -122,6 +167,7 @@ for (let i = 0; i < totalCards; i++) {
         });
     });
 }
+
 
 let centerPositions = [
     new THREE.Vector3(-0.5, 3.8, 0), // Position for Player 1's card in center
@@ -229,7 +275,7 @@ function handleRound() {
     } else {
         // Tie detected - initiate a war
         console.log("War initiated!");
-        handleWar(highestCards.map(entry => entry.owner));
+        handleWar(cardsThisRound.map(entry => entry.owner));
     }
     updateScores();
 }
@@ -458,14 +504,15 @@ document.addEventListener("keydown", (event) => {
 });
 
 //Point light addition
-const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
+const pLight = new THREE.PointLight(0xffffff, 1.0, 20, 2.0);
 //pLight.position.set(0, 4, 0); // close enough to table to see its pos 
 pLight.position.set(0, 6, 0); //starting pos
-pLight.intensity = 7.0;
+pLight.intensity = 8.0;
 pLight.castShadow = true;
 pLight.shadow.mapSize.width = 5000;
 pLight.shadow.mapSize.length = 5000;
-pLight.shadow.bias = -0.001
+pLight.shadow.bias = -0.003;
+pLight.shadow.radius = 6;
 scene.add(pLight);
 
 //rect light
@@ -495,22 +542,22 @@ function keyHandler(e) {
     break;
     case 87: //The 'W' key //z = -3 at most
         if (pLight.position.z > -3) {
-                pLight.position.z -= 0.1;
+                pLight.position.z -= 0.15;
             }
     break;
     case 83: //The 'S' key // z = 5 at most
         if (pLight.position.z < 5) {
-                pLight.position.z += 0.1;
+                pLight.position.z += 0.15;
             }
     break;
     case 65: //The 'A' key // x = -4 at most
         if (pLight.position.x > -4) {
-                pLight.position.x -= 0.1;
+                pLight.position.x -= 0.15;
             }
     break; 
     case 68: //The 'D' key // x = 4 at most
     if (pLight.position.x < 4) {
-                pLight.position.x += 0.1;
+                pLight.position.x += 0.15;
             }
     break;
     case 82: //The 'R' key to toggle on and off rectlight
@@ -520,14 +567,21 @@ function keyHandler(e) {
 }
 document.addEventListener( "keydown", keyHandler, false );
 
-
+}
 // Render loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
 }
-animate();    
+  document.getElementById('startButton').addEventListener('click', () => {
+    setupScene();  // Start the game setup and Three.js scene
+ 
+    // Hide the start button after the game starts
+    document.getElementById('startButton').style.display = 'none';
+ 
+    animate(); // Begin the animation loop
+ });
 </script>
 </body>
 </html>
