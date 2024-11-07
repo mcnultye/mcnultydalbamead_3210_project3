@@ -432,8 +432,11 @@ document.addEventListener("keydown", (event) => {
 const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
 //pLight.position.set(0, 4, 0); // close enough to table to see its pos 
 pLight.position.set(0, 6, 0); //starting pos
-pLight.intensity = 15.0;
+pLight.intensity = 10.0;
 pLight.castShadow = true;
+pLight.shadow.mapSize.width = 5000;
+pLight.shadow.mapSize.length = 5000;
+pLight.shadow.bias = -0.001
 lights.push(pLight);
 scene.add(pLight);
 
@@ -445,6 +448,7 @@ function shadowOnOff()
     }
 }
 
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; //to help with shadow smoothness
 
 
 function keyHandler(e) {
@@ -458,8 +462,8 @@ function keyHandler(e) {
     case 76: // The 'L' key
         ambientLight.visible = !ambientLight.visible;
     break;
-    case 87: //The 'W' key //z = -5 at most
-        if (pLight.position.z > -5) {
+    case 87: //The 'W' key //z = -3 at most
+        if (pLight.position.z > -3) {
                 pLight.position.z -= 0.1;
             }
     break;
@@ -468,15 +472,18 @@ function keyHandler(e) {
                 pLight.position.z += 0.1;
             }
     break;
-    case 65: //The 'A' key // x = -5 at most
-        if (pLight.position.x > -5) {
+    case 65: //The 'A' key // x = -4 at most
+        if (pLight.position.x > -4) {
                 pLight.position.x -= 0.1;
             }
     break; 
-    case 68: //The 'D' key // x = 5 at most
-    if (pLight.position.x < 5) {
+    case 68: //The 'D' key // x = 4 at most
+    if (pLight.position.x < 4) {
                 pLight.position.x += 0.1;
             }
+    break;
+    case 89: //The 'Y' key //toggles directional light on and off
+        directionalLight.visible = !directionalLight.visible;
     break;
 
   }
