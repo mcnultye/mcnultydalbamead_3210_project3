@@ -103,6 +103,7 @@ for (let i = 0; i < totalCards; i++) {
     piles[i % playersCount].push(deck.deck[i]);
 }
 
+// load in the table
  const gltfLoader = new GLTFLoader();
  gltfLoader.load('./components/kitchen_table.glb', function(glb) {
     const model = glb.scene;
@@ -112,7 +113,7 @@ for (let i = 0; i < totalCards; i++) {
     model.position.set(0.25, 0.15, 0);
 
 
-    const tableRotationY = model.rotation.y; // Get the table's Y rotation
+    const tableRotationY = model.rotation.y; 
 
     model.traverse(function(node) {
         if(node.isMesh) {
@@ -142,20 +143,20 @@ for (let i = 0; i < totalCards; i++) {
             const position = pilePositions[index];
             const offset = cardIndex * 0.005; // Stacking cards vertically
 
-            // Position the card
             card.obj.position.set(position.x, position.y + offset, position.z);
-            card.obj.scale.set(1, 1, 1); // Ensure cards are not scaled down
-  // Adjust rotations for each pile
-  if (index === 0) {
-    // Left pile: Cards should lie flat and face the center from the left
-    card.obj.rotation.set(-Math.PI / 2, Math.PI, Math.PI / 2); // Flat, facing inward (left)
-} else if (index === 1) {
-    // Right pile: Cards should lie flat and face the center from the right
-    card.obj.rotation.set(Math.PI / 2, 0, -Math.PI / 2); // Flat, facing inward (right)
-} else {
-    // Front pile: Cards should be flat and facing down
-    card.obj.rotation.set(Math.PI / 2, 0, 0); // Flat, facing down
-}
+            card.obj.scale.set(1, 1, 1); 
+
+        // Adjust rotations for each pile
+        if (index === 0) {
+            // Left pile: Cards should lie flat and face the center from the left
+            card.obj.rotation.set(-Math.PI / 2, Math.PI, Math.PI / 2); // Flat, facing inward (left)
+        } else if (index === 1) {
+            // Right pile: Cards should lie flat and face the center from the right
+            card.obj.rotation.set(Math.PI / 2, 0, -Math.PI / 2); // Flat, facing inward (right)
+        } else {
+            // Front pile: Cards should be flat and facing down
+            card.obj.rotation.set(Math.PI / 2, 0, 0); // Flat, facing down
+        }
 
 
 
@@ -232,6 +233,7 @@ function animateCardMove(card, targetPosition) {
     moveToCenter();
 }
 
+// get updated score for each round
 function updateScores() {
     document.getElementById("player1Score").innerText = piles[0] ? piles[0].length : 0;
     document.getElementById("player2Score").innerText = piles[1] ? piles[1].length : 0;
