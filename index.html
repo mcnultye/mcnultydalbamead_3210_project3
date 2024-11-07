@@ -16,6 +16,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Deck from './components/deck.js';
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
+RectAreaLightUniformsLib.init();
 
 var scene = new THREE.Scene();
 
@@ -31,20 +33,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 
  // Light Setup
- var lights = []
- const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
- ambientLight.castShadow = true;
- lights.push(ambientLight);
+ const ambientLight = new THREE.AmbientLight(0x0000ff, 0.75);
  scene.add(ambientLight);
- 
- const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
- directionalLight.position.y = 10;
- directionalLight.castShadow = true;
- directionalLight.shadow.mapSize.width = 1024;
- directionalLight.shadow.mapSize.length = 1024;
-
- lights.push(directionalLight);
- scene.add(directionalLight);
 
  // Create a new deck and deal cards
 const deck = new Deck();
@@ -431,21 +421,20 @@ document.addEventListener("keydown", (event) => {
 const pLight = new THREE.PointLight(0xffffff, 1.0, 50, 2.0);
 //pLight.position.set(0, 4, 0); // close enough to table to see its pos 
 pLight.position.set(0, 6, 0); //starting pos
-pLight.intensity = 10.0;
+pLight.intensity = 7.0;
 pLight.castShadow = true;
 pLight.shadow.mapSize.width = 5000;
 pLight.shadow.mapSize.length = 5000;
 pLight.shadow.bias = -0.001
-lights.push(pLight);
 scene.add(pLight);
 
-function shadowOnOff()
-{
-    for(let i = 0; i < lights.length; i++ )
-    {
-        lights[i].castShadow = !lights[i].castShadow;
-    }
-}
+//rect light
+const rectLight = new THREE.RectAreaLight(0xffffff, 2, 4, 2);
+rectLight.position.set(0, 6, 0); 
+rectLight.lookAt(0, 0, 0); 
+scene.add(rectLight);
+
+let shadowsEnabled = true;
 
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; //to help with shadow smoothness
 
@@ -456,7 +445,10 @@ function keyHandler(e) {
         pLight.visible = !pLight.visible;
     break;
     case 77: // The 'M' key 
-        shadowOnOff();
+        shadowsEnabled = !shadowsEnabled;
+        renderer.shadowMap.enabled = shadowsEnabled;
+        renderer.shadowMap.needsUpdate = true;
+        renderer.compile(scene, renderer.camera);
     break;
     case 76: // The 'L' key
         ambientLight.visible = !ambientLight.visible;
@@ -481,10 +473,9 @@ function keyHandler(e) {
                 pLight.position.x += 0.1;
             }
     break;
-    case 89: //The 'Y' key //toggles directional light on and off
-        directionalLight.visible = !directionalLight.visible;
+    case 82: //The 'R' key to toggle on and off rectlight
+        rectLight.visible = !rectLight.visible;
     break;
-
   }
 }
 document.addEventListener( "keydown", keyHandler, false );
