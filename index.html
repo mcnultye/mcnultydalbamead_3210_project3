@@ -33,10 +33,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 
  // Light Setup
- var lights = []
  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
- ambientLight.castShadow = true;
- lights.push(ambientLight);
  scene.add(ambientLight);
 
  // Create a new deck and deal cards
@@ -416,7 +413,6 @@ pLight.castShadow = true;
 pLight.shadow.mapSize.width = 5000;
 pLight.shadow.mapSize.length = 5000;
 pLight.shadow.bias = -0.001
-lights.push(pLight);
 scene.add(pLight);
 
 //rect light
@@ -425,13 +421,7 @@ rectLight.position.set(0, 6, 0);
 rectLight.lookAt(0, 0, 0); 
 scene.add(rectLight);
 
-function shadowOnOff()
-{
-    for(let i = 0; i < lights.length; i++ )
-    {
-        lights[i].castShadow = !lights[i].castShadow;
-    }
-}
+let shadowsEnabled = true;
 
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; //to help with shadow smoothness
 
@@ -442,7 +432,10 @@ function keyHandler(e) {
         pLight.visible = !pLight.visible;
     break;
     case 77: // The 'M' key 
-        shadowOnOff();
+        shadowsEnabled = !shadowsEnabled;
+        renderer.shadowMap.enabled = shadowsEnabled;
+        renderer.shadowMap.needsUpdate = true;
+        renderer.compile(scene, renderer.camera);
     break;
     case 76: // The 'L' key
         ambientLight.visible = !ambientLight.visible;
