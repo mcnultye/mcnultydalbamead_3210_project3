@@ -8,7 +8,7 @@ class Deck{
         this.deck = [];
         this.cardData = {
             suit: ['spades','hearts', 'clubs', 'diamonds'], 
-            value: [2,3,4,5,6,7,8,9,10,11,12,13,14]}; 
+            value: [2,3,4]}; //,5,6,7,8,9,10,11,12,13,14
         this.createDeck();
     }
 
