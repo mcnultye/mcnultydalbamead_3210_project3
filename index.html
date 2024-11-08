@@ -174,9 +174,9 @@ for (let i = 0; i < totalCards; i++) {
 
 
 let centerPositions = [
-    new THREE.Vector3(-0.6, 3.8, 0), // Position for Player 1's card in center
-    new THREE.Vector3(0.6, 3.8, 0),  // Position for Player 2's card in center
-    new THREE.Vector3(0, 3.8, -0.5)  // Position for Player 3's card in center
+    new THREE.Vector3(-2, 3.8, 0), // Position for Player 1's card in center
+    new THREE.Vector3(2, 3.8, 0),  // Position for Player 2's card in center
+    new THREE.Vector3(0, 3.8, 1)  // Position for Player 3's card in center
 ];
 let displayedCards = []; // Store cards in the current round
 let toMove = [];
@@ -389,11 +389,11 @@ function moveWarCardsFD(card, player){
     const startTime = Date.now();
 
     if(player == 0){
-        var targetPosition = new THREE.Vector3(-1.5,3.8,0);
+        var targetPosition = new THREE.Vector3(-1.2,3.8,.5);
     } if(player == 1){
-        var targetPosition = new THREE.Vector3(1.5,3.8,0);
+        var targetPosition = new THREE.Vector3(1.2,3.8,.5);
     } if(player == 2)
-        var targetPosition = new THREE.Vector3(0,3.8,-1.5);
+        var targetPosition = new THREE.Vector3(.5,3.8,.2);
 
     // First phase: Move the card to the center
     function moveToPile() {
@@ -413,14 +413,14 @@ function moveWarCardsFD(card, player){
 
 function moveWarCardsFU(card, player){
     if(player == 0){
-        createMovement(card, new THREE.Vector3(-0.6,3.8,1));
-        flipWar(card, new THREE.Vector3(-0.6,3.8,1),-80.1,500);
+        createMovement(card, new THREE.Vector3(-1.2,3.8,0));
+        flipWar(card, new THREE.Vector3(-1.2,3.8,0),-80.1,500);
     } if(player == 1){
-        createMovement(card, new THREE.Vector3(0.6,3.8,1));
-        flipWar(card, new THREE.Vector3(0.6,3.8,1),80.1,500);
+        createMovement(card, new THREE.Vector3(1.2,3.8,0));
+        flipWar(card, new THREE.Vector3(1.2,3.8,0),80.1,500);
     } if(player == 2){
-        createMovement(card, new THREE.Vector3(0,3.8,.5));
-        flipWar(card, new THREE.Vector3(0,3.8,.5),80.1,500);
+        createMovement(card, new THREE.Vector3(0,3.8,.2));
+        flipWar(card, new THREE.Vector3(0,3.8,.2),80.1,500);
     }
         
 }
