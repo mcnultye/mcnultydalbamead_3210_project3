@@ -266,7 +266,7 @@ function handleRound() {
         return null; // If no cards, mark player as out
     });
     // Filter out players who still have cards in this round
-    const activePlayers = cardsThisRound.filter(entry => entry !== null);
+    const activePlayers = cardsThisRound.filter(entry => entry && entry.owner !== null && piles[entry.owner].length > 0);
     if (activePlayers.length < 2) {
         console.log(`Game over! Player ${activePlayers[0] ? activePlayers[0].owner + 1 : 'unknown'} wins!`);
         updateScores();
@@ -295,8 +295,9 @@ function handleRound() {
     } else {
         // Tie detected - initiate a war
         console.log("War initiated!");
-        handleWar(cardsThisRound.map(entry => entry.owner));
-    }
+        const warParticipants = cardsThisRound.filter(entry => entry && entry.owner !== null && piles[entry.owner].length > 0);
+        handleWar(warParticipants.map(entry => entry.owner));
+        }
     updateScores();
 }
 
