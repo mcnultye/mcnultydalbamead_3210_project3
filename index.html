@@ -123,6 +123,11 @@ for (let i = 0; i < totalCards; i++) {
     positionCards(tableRotationY);
  });
 
+ var p1BY = 3.82;
+ var p2BY = 3.82;
+ var p3BY = 3.82;
+
+ var gameOver = false;
  function positionCards(tableRotationY) {
     // Check if piles are created
     if (piles.length === 0) {
@@ -136,6 +141,7 @@ for (let i = 0; i < totalCards; i++) {
       new THREE.Vector3(2.8, 3.8, 0),   // Right side of the table
       new THREE.Vector3(0, 3.8, 1.75)
   ];
+
 
      // Position the cards for each player
      piles.forEach((pile, index) => {
@@ -272,7 +278,7 @@ function handleRound() {
         updateScores();
         playerW = activePlayers[0];
         toMove = displayedCards;
-        setTimeout(moveCardsToWinner, 2000, activePlayers[0]);
+        gameOver = true;
         return;
     }
 
@@ -365,18 +371,30 @@ function moveCardsToWinner(winner){
     if(winner == 0){
         toMove.forEach((card)=> {
             flipAfterWin(card.obj, -Math.PI / 2, Math.PI,Math.PI / 2,500);
-            createMovement(card.obj, new THREE.Vector3(-2.8, piles[winner][0].obj.position.y - .005, 0)); 
+            createMovement(card.obj, new THREE.Vector3(-2.8, p1BY, 0)); 
+            p1BY -= .002;
+            if(p1BY < 3.8){
+                p1BY = 3.8 + (piles[winner].length/2)*.001;
+            }
         });
        
     } else if (winner == 1){
         toMove.forEach((card)=> {
             flipAfterWin(card.obj, Math.PI / 2, 0, -Math.PI / 2,500);
-            createMovement(card.obj, new THREE.Vector3(2.8,piles[winner][0].obj.position.y - .005,0));
+            createMovement(card.obj, new THREE.Vector3(2.8,p2BY,0));
+            p2BY -= .002;
+            if(p2BY < 3.8){
+                p2BY = 3.8 + (piles[winner].length/2)*.001;
+            }
         });
     } else if (winner == 2){
         toMove.forEach((card)=> {
             flipAfterWin(card.obj, Math.PI / 2, 0,0,500);
-            createMovement(card.obj, new THREE.Vector3(0, piles[winner][0].obj.position.y - .005, 1.75));
+            createMovement(card.obj, new THREE.Vector3(0, p3BY, 1.75));
+            p3BY -= .002;
+            if(p3BY < 3.8){
+                p3BY = 3.8 + (piles[winner].length/2)*.001;
+            }
         });
     }
     toMove = [];
@@ -499,12 +517,15 @@ let num = 1;
 // Key listener to start the round
 document.addEventListener("keydown", (event) => {
     if (event.key === 'N' || event.key === 'n') {
-        if(num == 1){
+        if(num == 1 && !gameOver){
             handleRound();
             num++;
-        } else {
+        } else if (!gameOver) {
             moveCardsToWinner(playerW);
             setTimeout(handleRound, 1000);
+        } else {
+            moveCardsToWinner(playerW);
+            updateScores();
         }
         
     }
